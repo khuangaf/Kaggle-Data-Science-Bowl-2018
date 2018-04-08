@@ -108,9 +108,9 @@ def evaluate( net, test_loader ):
 #--------------------------------------------------------------
 def run_train():
     #lr: special lr instead of None
-    out_dir  = RESULTS_DIR + '/mask-rcnn-50-resnext-gray500'
+#     out_dir  = RESULTS_DIR + '/mask-rcnn-50-resnext-gray500'
 #     out_dir  = RESULTS_DIR + '/mask-rcnn-resnext-50-colored100'
-#     out_dir  = RESULTS_DIR + '/mask-rcnn-resnext-50-color_external130'    
+    out_dir  = RESULTS_DIR + '/mask-rcnn-resnext-50-color_external130'    
 #     initial_checkpoint = \
 #         RESULTS_DIR + '/mask-rcnn-50-gray500-02/checkpoint/00016500_model.pth'
         ##
@@ -192,9 +192,9 @@ def run_train():
     log.write('** dataset setting **\n')
 
     train_dataset = ScienceDataset(
-                            'train1_ids_gray2_500', mode='train',
+#                             'train1_ids_gray2_500', mode='train',
 #                             'train1_ids_colored_100', mode='train',
-#                             'train1_external_ids_colored_130', mode='train',
+                            'train1_external_ids_colored_130', mode='train',
                             #'debug1_ids_gray_only_10', mode='train',
                             #'disk0_ids_dummy_9', mode='train', #12
                             #'train1_ids_purple_only1_101', mode='train', #12
@@ -212,8 +212,8 @@ def run_train():
 
 
     valid_dataset = ScienceDataset(
-                            'valid1_ids_gray2_43', mode='train',
-#                             'valid1_ids_colored_28', mode='train',
+#                             'valid1_ids_gray2_43', mode='train',
+                            'valid1_ids_colored_28', mode='train',
 #                             'debug1_ids_gray_only_10', mode='train',
                             #'disk0_ids_dummy_9', mode='train',
                             #'train1_ids_purple_only1_101', mode='train', #12

@@ -1,7 +1,7 @@
 import os, sys
 sys.path.append(os.path.dirname(__file__))
 
-from train import *
+from train_resnext import *
 from sklearn.externals import joblib
 import skimage.morphology as morph
 from skimage.filters import threshold_otsu
@@ -9,7 +9,7 @@ import scipy.ndimage as ndi
 from scipy.stats import itemfreq
 from itertools import product
 
-os.environ['CUDA_VISIBLE_DEVICES'] = '0'
+# os.environ['CUDA_VISIBLE_DEVICES'] = '1'
 
 ALL_TEST_IMAGE_ID =[
     '0114f484a16c152baa2d82fdd43740880a762c93f436c8988ac461c5c9dbe7d5',
@@ -332,16 +332,14 @@ def watershed_v4(mask, contour):
         
     return labels
 #--------------------------------------------------------------
-out_dir  = RESULTS_DIR + '/mask-rcnn-50-gray500-02-he'
+out_dir  = RESULTS_DIR + '/mask-rcnn-50-resnext-gray500'
     
 def run_submit():
 
 
 
-#     initial_checkpoint = \
-#         out_dir + '/checkpoint/00016500_model.pth'
     initial_checkpoint = \
-        RESULTS_DIR + '/mask-rcnn-50-gray500-02' + '/checkpoint/00016500_model.pth'
+        out_dir + '/checkpoint/00045000_model.pth'
         ##
 
     ## setup  ---------------------------
@@ -379,11 +377,11 @@ def run_submit():
     log.write('** dataset setting **\n')
 
     test_dataset = ScienceDataset(
-                                #'valid1_ids_gray_only1_43', mode='test',
+#                                 'valid1_ids_gray_only1_43', mode='test',
                                 #'debug1_ids_gray_only_10', mode='test',
 #                                 'test1_ids_color_12', mode='test',
-#                                 'test1_ids_gray_only_53',mode='test',
-                                'HE_test_ids',mode='test',        
+                                'test1_ids_gray_only_53',mode='test',
+#                                 'HE_test_ids',mode='test',
                                 transform = submit_augment)
     test_loader  = DataLoader(
                         test_dataset,
@@ -414,9 +412,7 @@ def run_submit():
                          (timer() - start) / 60), end='',flush=True)
         time.sleep(0.01)
 
-        inputs = inputs.mean(dim=1,  keepdim=True)
-        inputs = torch.cat((inputs, inputs, inputs), 1)
-        print(inputs.shape)
+
         net.set_mode('test')
         with torch.no_grad():
             inputs = Variable(inputs).cuda()
@@ -452,10 +448,11 @@ def run_submit():
 
             # --------------------------------------------
             id = test_dataset.ids[indices[b]]
+            name =id.split('/')[-1]
 #             mask = color_overlay.mean(axis=2)
             
 #             emptyImage = np.zeros_like(color_overlay).astype(np.uint8)
-            name =id.split('/')[-1]
+            
 #             imgray = cv2.cvtColor(color_overlay, cv2.COLOR_BGR2GRAY)
 #             thresh_val = threshold_otsu(imgray)
 #             ret,thresh = cv2.threshold(imgray, thresh_val, 255,0)
@@ -537,7 +534,7 @@ def run_npy_to_sumbit_csv():
 
 
     npy_dir = submit_dir  + '/npys'
-    csv_file = submit_dir + '/mask-rcnn-50-gray500-16.5K-HE.csv'
+    csv_file = submit_dir + '/mask-rcnn-50-resnext-gray500-45k.csv'
 
     ## start -----------------------------
     all_num=0

@@ -1,5 +1,5 @@
 import os
-os.environ['CUDA_VISIBLE_DEVICES'] = '0'  #'3,2' #'3,2,1,0'
+os.environ['CUDA_VISIBLE_DEVICES'] = '1'  #'3,2' #'3,2,1,0'
 
 from common import *
 from utility.file   import *
