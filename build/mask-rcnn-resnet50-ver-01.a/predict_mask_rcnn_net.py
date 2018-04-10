@@ -1,8 +1,9 @@
 import os, sys
 sys.path.append(os.path.dirname(__file__))
-
+os.environ['CUDA_VISIBLE_DEVICES'] = '1'
+from dataset.reader import *
 #--------------------------------------------------------------
-
+from skimage.exposure import adjust_gamma
 from train_resnext import * #se_resnext50_mask_rcnn_2crop
 #from train_mask_rcnn_net_2 import * #se_resnext101_mask_rcnn
 
@@ -42,37 +43,44 @@ def run_predict():
     # initial_checkpoint = \
     #    RESULTS_DIR + '/mask-se-resnext101-gray500-border0.25-02/checkpoint/00036000_model.pth'
 
-    out_dir = RESULTS_DIR + '/mask-se-resnext50-rcnn_2crop-mega-05b'
+#     out_dir = RESULTS_DIR + '/mask-rcnn-50-resnext-gray500-aug-avg'
+    out_dir = RESULTS_DIR + '/mask-rcnn-resnext-50-color_external130-aug-avg'
     initial_checkpoint = \
-       RESULTS_DIR + '/mask-se-resnext50-rcnn_2crop-mega-05b/checkpoint/00020000_model.pth'
+       RESULTS_DIR + '/mask-rcnn-resnext-50-color_external130/checkpoint/00020500_model.pth'
        #RESULTS_DIR + '/mask-se-resnext50-rcnn_2crop-mega-05b/checkpoint/00015500_model.pth'
        #RESULTS_DIR + '/mask-se-resnext50-rcnn_2crop-mega-05a/checkpoint/00014500_model.pth'
         #'/root/share/project/kaggle/science2018/results/mask-se-resnext50-gray500-00/checkpoint/00034000_model.pth'
 
 
     # augment -----------------------------------------------------------------------------------------------------
-    #do_test_augment, undo_test_augment = do_test_augment_identity, undo_test_augment_identity
-    #do_test_augment, undo_test_augment = do_test_augment_horizontal_flip, undo_test_augment_horizontal_flip
-    #do_test_augment, undo_test_augment = do_test_augment_vertical_flip, undo_test_augment_vertical_flip
+#     do_test_augment, undo_test_augment = do_test_augment_identity, undo_test_augment_identity
+#     do_test_augment, undo_test_augment = do_test_augment_horizontal_flip, undo_test_augment_horizontal_flip
+#     do_test_augment, undo_test_augment = do_test_augment_vertical_flip, undo_test_augment_vertical_flip
 
-    #do_test_augment, undo_test_augment = do_test_augment_rotate180, undo_test_augment_rotate180
-    #do_test_augment, undo_test_augment = do_test_augment_rotate090, undo_test_augment_rotate090
-    do_test_augment, undo_test_augment = do_test_augment_rotate270, undo_test_augment_rotate270
+#     do_test_augment, undo_test_augment = do_test_augment_rotate180, undo_test_augment_rotate180
+    do_test_augment, undo_test_augment = do_test_augment_rotate090, undo_test_augment_rotate090
+#     do_test_augment, undo_test_augment = do_test_augment_rotate270, undo_test_augment_rotate270
 
-    #do_test_augment, undo_test_augment = do_test_augment_scale, undo_test_augment_scale
+#     do_test_augment, undo_test_augment = do_test_augment_scale, undo_test_augment_scale
     # augment -----------------------------------------------------------------------------------------------------
 
 
 
     # split = 'valid1_ids_gray2_43'
-    split = 'test1_ids_gray2_53'
+#     split = 'test1_ids_gray_only_53'
+    
+    split = 'test1_ids_color_12'
     # split = 'BBBC006'
 
     #tag = 'test1_ids_gray2_53-00011000_model'
     #tag = 'xxx_scale_2.4_high'
-    tag = 'aaa_normal'
+#     tag = 'identity'
+#     tag = 'h_flip'
+#     tag = 'v_flip'
+#     tag = 'r_180'
+    tag = 'r_90'
 
-
+    
 
     ## setup  --------------------------
     os.makedirs(out_dir +'/predict/%s/overlays'%tag, exist_ok=True)
@@ -89,6 +97,7 @@ def run_predict():
     log.write('\tSEED         = %u\n' % SEED)
     log.write('\tPROJECT_PATH = %s\n' % PROJECT_PATH)
     log.write('\tout_dir      = %s\n' % out_dir)
+    
     log.write('\n')
 
 
@@ -113,6 +122,8 @@ def run_predict():
     ids = read_list_from_file(DATA_DIR + '/split/' + split, comment='#')
     log.write('\ttsplit   = %s\n'%(split))
     log.write('\tlen(ids) = %d\n'%(len(ids)))
+#     log.write('initial_checkpoint  = %s\n'%(initial_checkpoint))
+    log.write('tag=%s\n'%tag)
     log.write('\n')
 
 
@@ -158,27 +169,27 @@ def run_predict():
 
             threshold = 0.8  #cfg.rcnn_test_nms_pre_score_threshold  #0.8
             #all1 = draw_predict_proposal(threshold, image, rcnn_proposal)
-            all2 = draw_predict_mask(threshold, image, mask, detection)
+#             all2 = draw_predict_mask(threshold, image, mask, detection)
 
             ## save
             #cv2.imwrite(out_dir +'/predict/%s/predicts/%s.png'%(tag,name), all1)
-            cv2.imwrite(out_dir +'/predict/%s/predicts/%s.png'%(tag,name), all2)
+#             cv2.imwrite(out_dir +'/predict/%s/predicts/%s.png'%(tag,name), all2)
 
             #image_show('predict_proposal',all1)
-            image_show('predict_mask',all2)
+#             image_show('predict_mask',all2)
 
             if 1:
                 norm_image      = adjust_gamma(image,2.5)
-                color_overlay   = mask_to_color_overlay(mask)
-                color1_overlay  = mask_to_contour_overlay(mask, color_overlay)
-                contour_overlay = mask_to_contour_overlay(mask, norm_image, [0,255,0])
+                color_overlay   = multi_mask_to_color_overlay(mask)
+                color1_overlay  = multi_mask_to_contour_overlay(mask, color_overlay)
+                contour_overlay = multi_mask_to_contour_overlay(mask, norm_image, [0,255,0])
 
 
                 #mask_score = cv2.cvtColor((np.clip(mask_score,0,1)*255).astype(np.uint8),cv2.COLOR_GRAY2BGR)
                 mask_score = cv2.cvtColor((mask_score/mask_score.max()*255).astype(np.uint8),cv2.COLOR_GRAY2BGR)
 
                 all = np.hstack((image, contour_overlay, color1_overlay, mask_score)).astype(np.uint8)
-                image_show('overlays',all)
+#                 image_show('overlays',all)
 
                 #psd
                 os.makedirs(out_dir +'/predict/overlays', exist_ok=True)
@@ -196,8 +207,7 @@ def run_predict():
 
     #assert(test_num == len(test_loader.sampler))
     log.write('-------------\n')
-    log.write('initial_checkpoint  = %s\n'%(initial_checkpoint))
-    log.write('tag=%s\n'%tag)
+    
     log.write('\n')
 
 

@@ -15,22 +15,25 @@ def make_mask_more(net):
     mask_logit = net.mask_logits.cpu().data.numpy()
     mask_prob  = np_sigmoid(mask_logit)
     mask       = net.masks[0]
-
+#     print(f'mask prob {mask_prob}')
     height,width = mask.shape[:2]
     mask_score = np.zeros((height,width),np.float32)
     num_detection = len(detection)
     for n in range(num_detection):
-        _,x0,y0,x1,y1,score,label,k = detection[n]
+#         _,x0,y0,x1,y1,score,label, k = detection[n]
+        _,x0,y0,x1,y1,score,label = detection[n]
         x0 = int(round(x0))
         y0 = int(round(y0))
         x1 = int(round(x1))
         y1 = int(round(y1))
         label = int(label)
-        k = int(k)
+#         k = int(k)
         h, w  = y1-y0+1, x1-x0+1
 
 
-        crop  = mask_prob[k, label]
+#         crop  = mask_prob[k, label]
+#         crop  = mask_prob[0, label]
+        crop = mask_prob.mean(0)[label]
         crop  = cv2.resize(crop, (w,h), interpolation=cv2.INTER_LINEAR)
         mask_score[y0:y1+1,x0:x1+1] += crop
 
@@ -69,7 +72,7 @@ def undo_test_augment_identity(net, image):
     ps = rcnn_proposal.copy()
     rcnn_proposal=[]
     for p in ps:
-        i,x0,y0,x1,y1, score, label, aux = p
+        i,x0,y0,x1,y1, score, label = p
         x0 = max(min(x0,width -1),0)
         x1 = max(min(x1,width -1),0)
         y0 = max(min(y0,height-1),0)
@@ -78,7 +81,7 @@ def undo_test_augment_identity(net, image):
         h = y1-y0 + 1
 
         if w>2 and h>2:
-            rcnn_proposal.append([i,x0,y0,x1,y1, score, label, aux])
+            rcnn_proposal.append([i,x0,y0,x1,y1, score, label])
 
     rcnn_proposal= np.array(rcnn_proposal, np.float32)
 
@@ -90,7 +93,7 @@ def undo_test_augment_identity(net, image):
     ps = detection.copy()
     detection=[]
     for t,p in enumerate(ps):
-        i,x0,y0,x1,y1, score, label, aux = p
+        i,x0,y0,x1,y1, score, label = p
         x0 = max(min(x0,width -1),0)
         x1 = max(min(x1,width -1),0)
         y0 = max(min(y0,height-1),0)
@@ -98,7 +101,7 @@ def undo_test_augment_identity(net, image):
         w = x1-x0 + 1
         h = y1-y0 + 1
         if w>2 and h>2:
-            detection.append([i,x0,y0,x1,y1, score, label, aux])
+            detection.append([i,x0,y0,x1,y1, score, label])
         else:
             mask[mask==t+1]=0
 
@@ -161,20 +164,20 @@ def undo_test_augment_horizontal_flip(net, image):
     ps = rcnn_proposal.copy()
     rcnn_proposal=[]
     for p in ps:
-        i,x0,y0,x1,y1, score, label, aux = p
+        i,x0,y0,x1,y1, score, label = p
         x0 = width -1 - x0
         x1 = width -1 - x1
-        rcnn_proposal.append([i,x0,y0,x1,y1, score, label, aux])
+        rcnn_proposal.append([i,x0,y0,x1,y1, score, label])
     rcnn_proposal= np.array(rcnn_proposal, np.float32)
 
 
     ps = detection.copy()
     detection=[]
     for t,p in enumerate(ps):
-        i,x0,y0,x1,y1, score, label, aux = p
+        i,x0,y0,x1,y1, score, label = p
         x0 = width -1 - x0
         x1 = width -1 - x1
-        detection.append([i,x0,y0,x1,y1, score, label, aux])
+        detection.append([i,x0,y0,x1,y1, score, label])
     detection= np.array(detection, np.float32)
 
     mask = np.fliplr(mask)
@@ -200,20 +203,20 @@ def undo_test_augment_vertical_flip(net, image):
     ps = rcnn_proposal.copy()
     rcnn_proposal=[]
     for p in ps:
-        i,x0,y0,x1,y1, score, label, aux = p
+        i,x0,y0,x1,y1, score, label = p
         y0 = height -1 - y0
         y1 = height -1 - y1
-        rcnn_proposal.append([i,x0,y0,x1,y1, score, label, aux])
+        rcnn_proposal.append([i,x0,y0,x1,y1, score, label])
     rcnn_proposal= np.array(rcnn_proposal, np.float32)
 
 
     ps = detection.copy()
     detection=[]
     for t,p in enumerate(ps):
-        i,x0,y0,x1,y1, score, label, aux = p
+        i,x0,y0,x1,y1, score, label = p
         y0 = height -1 - y0
         y1 = height -1 - y1
-        detection.append([i,x0,y0,x1,y1, score, label, aux])
+        detection.append([i,x0,y0,x1,y1, score, label])
     detection= np.array(detection, np.float32)
 
     mask = np.flipud(mask)
@@ -239,20 +242,20 @@ def undo_test_augment_rotate090(net, image):
     ps = rcnn_proposal.copy()
     rcnn_proposal=[]
     for p in ps:
-        i,x0,y0,x1,y1, score, label, aux = p
+        i,x0,y0,x1,y1, score, label = p
         x0,y0 = y0,width-1-x0
         x1,y1 = y1,width-1-x1
-        rcnn_proposal.append([i,x0,y0,x1,y1, score, label, aux])
+        rcnn_proposal.append([i,x0,y0,x1,y1, score, label])
     rcnn_proposal= np.array(rcnn_proposal, np.float32)
 
 
     ps = detection.copy()
     detection=[]
     for t,p in enumerate(ps):
-        i,x0,y0,x1,y1, score, label, aux = p
+        i,x0,y0,x1,y1, score, label = p
         x0,y0 = y0,width-1-x0
         x1,y1 = y1,width-1-x1
-        detection.append([i,x0,y0,x1,y1, score, label, aux])
+        detection.append([i,x0,y0,x1,y1, score, label])
     detection= np.array(detection, np.float32)
 
     mask = np.fliplr(mask)
@@ -279,24 +282,24 @@ def undo_test_augment_rotate180(net, image):
     ps = rcnn_proposal.copy()
     rcnn_proposal=[]
     for p in ps:
-        i,x0,y0,x1,y1, score, label, aux = p
+        i,x0,y0,x1,y1, score, label = p
         x0 = width  -1 - x0
         x1 = width  -1 - x1
         y0 = height -1 - y0
         y1 = height -1 - y1
-        rcnn_proposal.append([i,x0,y0,x1,y1, score, label, aux])
+        rcnn_proposal.append([i,x0,y0,x1,y1, score, label])
     rcnn_proposal= np.array(rcnn_proposal, np.float32)
 
 
     ps = detection.copy()
     detection=[]
     for t,p in enumerate(ps):
-        i,x0,y0,x1,y1, score, label, aux = p
+        i,x0,y0,x1,y1, score, label = p
         x0 = width  -1 - x0
         x1 = width  -1 - x1
         y0 = height -1 - y0
         y1 = height -1 - y1
-        detection.append([i,x0,y0,x1,y1, score, label, aux])
+        detection.append([i,x0,y0,x1,y1, score, label])
     detection= np.array(detection, np.float32)
 
     mask = np.fliplr(mask)
@@ -325,20 +328,20 @@ def undo_test_augment_rotate270(net, image):
     ps = rcnn_proposal.copy()
     rcnn_proposal=[]
     for p in ps:
-        i,x0,y0,x1,y1, score, label, aux = p
+        i,x0,y0,x1,y1, score, label = p
         x0,y0 = height-1-y0,x0
         x1,y1 = height-1-y1,x1
-        rcnn_proposal.append([i,x0,y0,x1,y1, score, label, aux])
+        rcnn_proposal.append([i,x0,y0,x1,y1, score, label])
     rcnn_proposal= np.array(rcnn_proposal, np.float32)
 
 
     ps = detection.copy()
     detection=[]
     for t,p in enumerate(ps):
-        i,x0,y0,x1,y1, score, label, aux = p
+        i,x0,y0,x1,y1, score, label = p
         x0,y0 = height-1-y0,x0
         x1,y1 = height-1-y1,x1
-        detection.append([i,x0,y0,x1,y1, score, label, aux])
+        detection.append([i,x0,y0,x1,y1, score, label])
     detection= np.array(detection, np.float32)
 
     mask = np.flipud(mask)
@@ -410,24 +413,24 @@ def undo_test_augment_scale(net, image):
     ps = rcnn_proposal.copy()
     rcnn_proposal=[]
     for p in ps:
-        i,x0,y0,x1,y1, score, label, aux = p
+        i,x0,y0,x1,y1, score, label = p
         x0 = min(int(round(x0*scale_x)),width-1)
         y0 = min(int(round(y0*scale_y)),height-1)
         x1 = min(int(round(x1*scale_x)),width-1)
         y1 = min(int(round(y1*scale_y)),height-1)
-        rcnn_proposal.append([i,x0,y0,x1,y1, score, label, aux])
+        rcnn_proposal.append([i,x0,y0,x1,y1, score, label])
     rcnn_proposal= np.array(rcnn_proposal, np.float32)
 
 
     ps = detection.copy()
     detection=[]
     for t,p in enumerate(ps):
-        i,x0,y0,x1,y1, score, label, aux = p
+        i,x0,y0,x1,y1, score, label = p
         x0 = min(int(round(x0*scale_x)),width-1)
         y0 = min(int(round(y0*scale_y)),height-1)
         x1 = min(int(round(x1*scale_x)),width-1)
         y1 = min(int(round(y1*scale_y)),height-1)
-        detection.append([i,x0,y0,x1,y1, score, label, aux])
+        detection.append([i,x0,y0,x1,y1, score, label])
     detection = np.array(detection, np.float32)
 
     mask, mask_score = scale_mask(detection, mask_prob, width, height )
