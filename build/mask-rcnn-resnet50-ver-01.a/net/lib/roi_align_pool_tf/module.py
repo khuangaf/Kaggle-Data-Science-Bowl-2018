@@ -37,8 +37,8 @@ class RoIAlign(Module):
 
         #need to normalised (x0,y0,x1,y1) to [0,1]
         height, width = features.size()[2:4]
-#         ids, x0, y0, x1, y1= torch.split(rois, 1, dim=1)
-        ids, x0, y0, x1, y1,_,_= torch.split(rois, 1, dim=1)
+        ids, x0, y0, x1, y1= torch.split(rois, 1, dim=1)
+#         ids, x0, y0, x1, y1,_,_= torch.split(rois, 1, dim=1)
         ids = ids.int()
         x0 = x0*self.spatial_scale
         y0 = y0*self.spatial_scale

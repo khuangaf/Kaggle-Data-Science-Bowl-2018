@@ -108,11 +108,11 @@ def evaluate( net, test_loader ):
 #--------------------------------------------------------------
 def run_train():
     #lr: special lr instead of None
-    out_dir  = RESULTS_DIR + '/mask-rcnn-50-resnext-gray500-lr'
+    out_dir  = RESULTS_DIR + '/mask-rcnn-resnext-50-color_external130-stage2'
 #     out_dir  = RESULTS_DIR + '/mask-rcnn-resnext-50-colored100'
 #     out_dir  = RESULTS_DIR + '/mask-rcnn-resnext-50-color_external130'    
     initial_checkpoint = \
-        RESULTS_DIR + '/mask-rcnn-50-resnext-gray500/checkpoint/00009000_model.pth'
+        RESULTS_DIR + '/mask-rcnn-resnext-50-color_external130/checkpoint/00016500_model.pth'
         ##
 #     initial_checkpoint = None
     pretrain_file = \
@@ -171,8 +171,8 @@ def run_train():
                    + list(range(0,num_iters,500))#1*1000
 
 
-#     LR = None  #LR = StepLR([ (0, 0.01),  (200, 0.001),  (300, -1)])
-    LR = StepLR([ (0, 0.01), (10000, 0.001), (20000, 0.0001), (30000, 0.00001)])
+    LR = None  #LR = StepLR([ (0, 0.01),  (200, 0.001),  (300, -1)])
+#     LR = StepLR([ (0, 0.01), (10000, 0.001), (20000, 0.0001), (30000, 0.00001)])
     optimizer = optim.SGD(filter(lambda p: p.requires_grad, net.parameters()),
                           lr=0.01/iter_accum, momentum=0.9, weight_decay=0.0001)
 
@@ -192,7 +192,8 @@ def run_train():
     log.write('** dataset setting **\n')
 
     train_dataset = ScienceDataset(
-                            'train1_ids_gray2_500', mode='train',
+#                             'train1_test1_ids_gray_544-rms', mode='train',
+                            'train1_test1_external_ids_color_142',mode='train',
 #                             'train1_ids_colored_100', mode='train',
 #                             'train1_external_ids_colored_130', mode='train',
                             #'debug1_ids_gray_only_10', mode='train',
@@ -212,8 +213,8 @@ def run_train():
 
 
     valid_dataset = ScienceDataset(
-                            'valid1_ids_gray2_43', mode='train',
-#                             'valid1_ids_colored_28', mode='train',
+#                             'valid1_ids_gray2_43', mode='train',
+                            'valid1_ids_colored_28', mode='train',
 #                             'debug1_ids_gray_only_10', mode='train',
                             #'disk0_ids_dummy_9', mode='train',
                             #'train1_ids_purple_only1_101', mode='train', #12

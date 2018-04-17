@@ -49,6 +49,7 @@ def fix_crop_transform2(image, mask, x,y,w,h):
 
 def random_crop_transform2(image, mask, w,h, u=0.5):
     x,y = -1,-1
+
     if random.random() < u:
 
         H,W = image.shape[:2]

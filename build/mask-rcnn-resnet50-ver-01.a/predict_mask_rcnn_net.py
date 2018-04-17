@@ -44,9 +44,9 @@ def run_predict():
     #    RESULTS_DIR + '/mask-se-resnext101-gray500-border0.25-02/checkpoint/00036000_model.pth'
 
 #     out_dir = RESULTS_DIR + '/mask-rcnn-50-resnext-gray500-aug-avg'
-    out_dir = RESULTS_DIR + '/mask-rcnn-resnext-50-color_external130-aug-avg'
+    out_dir = RESULTS_DIR + '/mask-rcnn-50-resnext-gray500-ensemble'
     initial_checkpoint = \
-       RESULTS_DIR + '/mask-rcnn-resnext-50-color_external130/checkpoint/00020500_model.pth'
+       RESULTS_DIR + '/mask-rcnn-50-resnext-gray500/checkpoint/00040000_model.pth'
        #RESULTS_DIR + '/mask-se-resnext50-rcnn_2crop-mega-05b/checkpoint/00015500_model.pth'
        #RESULTS_DIR + '/mask-se-resnext50-rcnn_2crop-mega-05a/checkpoint/00014500_model.pth'
         #'/root/share/project/kaggle/science2018/results/mask-se-resnext50-gray500-00/checkpoint/00034000_model.pth'
@@ -58,18 +58,20 @@ def run_predict():
 #     do_test_augment, undo_test_augment = do_test_augment_vertical_flip, undo_test_augment_vertical_flip
 
 #     do_test_augment, undo_test_augment = do_test_augment_rotate180, undo_test_augment_rotate180
-    do_test_augment, undo_test_augment = do_test_augment_rotate090, undo_test_augment_rotate090
-#     do_test_augment, undo_test_augment = do_test_augment_rotate270, undo_test_augment_rotate270
+#     do_test_augment, undo_test_augment = do_test_augment_rotate090, undo_test_augment_rotate090
+    do_test_augment, undo_test_augment = do_test_augment_rotate270, undo_test_augment_rotate270
 
-#     do_test_augment, undo_test_augment = do_test_augment_scale, undo_test_augment_scale
+
     # augment -----------------------------------------------------------------------------------------------------
 
 
 
     # split = 'valid1_ids_gray2_43'
 #     split = 'test1_ids_gray_only_53'
-    
-    split = 'test1_ids_color_12'
+#     split='test2_ids_color_219'
+    split='test2_ids_gray_2800'
+#     split = 'test2_ids_gray_2800'
+#     split = 'test1_ids_color_12'
     # split = 'BBBC006'
 
     #tag = 'test1_ids_gray2_53-00011000_model'
@@ -78,7 +80,8 @@ def run_predict():
 #     tag = 'h_flip'
 #     tag = 'v_flip'
 #     tag = 'r_180'
-    tag = 'r_90'
+#     tag = 'r_90'
+    tag= 'r_270'
 
     
 
@@ -134,7 +137,7 @@ def run_predict():
 
     for i in range(len(ids)):
         folder, name = ids[i].split('/')[-2:]
-        print('%03d %s'%(i,name))
+        print(f'{i} {name}',flush=True)
 
         #'4727d94c6a57ed484270fdd8bbc6e3d5f2f15d5476794a4e37a40f2309a091e2'
         #name='0ed3555a4bd48046d3b63d8baf03a5aa97e523aa483aaa07459e7afa39fb96c6'
@@ -153,6 +156,10 @@ def run_predict():
         with torch.no_grad():
             input = torch.from_numpy(augment_image.transpose((2,0,1))).float().div(255).unsqueeze(0)
             input = Variable(input).cuda()
+            # don't predict image of size too large
+            
+            if input.size()[-1] > 1000 or input.size()[-2] > 1000:
+                continue
             net.forward(input)
 
 
@@ -206,8 +213,9 @@ def run_predict():
 
 
     #assert(test_num == len(test_loader.sampler))
-    log.write('-------------\n')
     
+    log.write('-------------\n')
+    log.write('tag=%s\n'%tag)
     log.write('\n')
 
 
